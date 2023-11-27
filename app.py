@@ -1,5 +1,6 @@
 from flask import Flask
 app = Flask(__name__)
-import Database_Connector
+from Database import *
 
-Database_Connector
+mydb = Database.connectToDB()
+Database.createTables(mydb)
