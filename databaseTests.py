@@ -1,5 +1,8 @@
+
+import datetime
 from Database import *
 from User import *
+from Status import *
 
 
 def test_database_createTables():
@@ -59,5 +62,37 @@ def test_changeUserProfile():
     assert (newProfile.lineManagerID ==result.lineManagerID)
     assert (newProfile.totalHolidays ==result.totalHolidays)
 
+def test_getUserPTORequests():
+    mydb = Database.connectToDB()
+    requests = Database.getPTORequest(mydb,1)
+    tempRequests = HolidayRequest(2,datetime.date(2018, 6, 15),datetime.date(2017, 6, 15),Status.APPROVED)
+    requests = Database.getPTORequest(mydb, 2)
 
+    assert(tempRequests.userID == requests[0].userID)
+    assert(tempRequests.startDate == requests[0].startDate)
+    assert(tempRequests.endDate == requests[0].endDate)
+    assert(tempRequests.status == requests[0].status)
 
+def test_addUserPTORequest():
+    mydb = Database.connectToDB()
+    tempRequests = HolidayRequest(1,datetime.date(2019, 6, 15),datetime.date(2019, 6, 16),Status.APPROVED)
+    Database.addNewPTORequest(mydb, tempRequests)
+    requests = Database.getPTORequest(mydb, 1)
+
+    assert(tempRequests.userID == requests[0].userID)
+    assert(tempRequests.startDate == requests[0].startDate)
+    assert(tempRequests.endDate == requests[0].endDate)
+    assert(tempRequests.status == requests[0].status)
+
+def test_changePTORequestTOApproved():
+    mydb = Database.connectToDB()
+    tempRequests = HolidayRequest(3,datetime.date(2019, 6, 15),datetime.date(2019, 6, 16),Status.DENIED)
+    Database.addNewPTORequest(mydb, tempRequests)
+    newRequest = HolidayRequest(3,datetime.date(2019, 6, 15),datetime.date(2019, 6, 16),Status.APPROVED)
+    Database.changeStateOfRequest(mydb, newRequest)
+    requests = Database.getPTORequest(mydb, 3)
+
+    assert(newRequest.userID == requests[0].userID)
+    assert(newRequest.startDate == requests[0].startDate)
+    assert(newRequest.endDate == requests[0].endDate)
+    assert(newRequest.status == requests[0].status)

@@ -13,11 +13,12 @@ CREATE TABLE IF NOT EXISTS users (
     TotalHolidays INT
 );
 CREATE TABLE IF NOT EXISTS pto_requests (
-    RequestID VARCHAR(255) PRIMARY KEY,
+    RequestID int NOT NULL AUTO_INCREMENT,
     UserID VARCHAR(255),
     Start DATE,
     End DATE,
     Status VARCHAR(255),
+    PRIMARY KEY (RequestID),
     FOREIGN KEY (UserID) REFERENCES users(UserID)
 );
 

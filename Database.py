@@ -1,5 +1,7 @@
 import mysql.connector
 from User import *
+from HolidayRequest import *
+from Status import *
 
 class Database:
     def connectToDB():
@@ -56,5 +58,36 @@ class Database:
         sqlCommand = "UPDATE users SET Email = '"+user.email+"', FirstName = '"+user.firstName+"', SecondName= '"+user.secondName+"',  Password= '"+user.password+"',  ProfilePicture = '"+user.profilePicture+"', PhoneNumber = '"+str(user.phoneNumber)+"', LineManager = '"+str(lineManager)+"', LineManagerID = '"+str(user.lineManagerID)+"', TotalHolidays = '"+str(user.totalHolidays)+"' WHERE UserID = '"+str(user.userID)+"';"
         print(sqlCommand)
         cursor = mydb.cursor()
+        cursor.execute(sqlCommand)
+        mydb.commit()
+
+    def getPTORequest(mydb, userID):
+        cursor = mydb.cursor()
+        sqlCommand = "SELECT * FROM pto_requests WHERE UserID = "+str(userID)+";"
+        cursor.execute(sqlCommand)
+        result = cursor.fetchall()
+        list = []
+        for x in result:
+            hr = HolidayRequest(int(x[1]), x[2], x[3], x[4])
+            match hr.status:
+                case "Status.APPROVED":
+                    hr.status = Status.APPROVED
+                case "Status.DENIED":
+                    hr.status = Status.DENIED
+                case "Status.REVIEW":
+                    hr.status = Status.REVIEW
+            list.append(hr)
+
+        return list
+    
+    def addNewPTORequest(mydb, request):
+        cursor = mydb.cursor()
+        sqlCommand = "INSERT INTO pto_requests (UserID, Start, End, Status) SELECT * FROM ( SELECT '"+str(request.userID)+"' , '"+str(request.startDate)+"' , '"+str(request.endDate)+"' , '"+str(request.status)+"') AS tmp WHERE NOT EXISTS (SELECT * FROM pto_requests where UserID = '"+str(request.userID)+"' AND Start = '"+str(request.startDate)+"' AND End = '"+str(request.endDate)+"') LIMIT 1;"
+        cursor.execute(sqlCommand)
+        mydb.commit()
+
+    def changeStateOfRequest(mydb, request):
+        cursor = mydb.cursor()
+        sqlCommand = "UPDATE pto_requests SET Status = '"+str(request.status)+"' where (UserID = '"+str(request.userID)+"' AND Start = '"+str(request.startDate)+"' AND End = '"+str(request.endDate)+"');"
         cursor.execute(sqlCommand)
         mydb.commit()
