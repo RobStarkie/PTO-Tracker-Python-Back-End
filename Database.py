@@ -68,7 +68,7 @@ class Database:
         result = cursor.fetchall()
         list = []
         for x in result:
-            hr = HolidayRequest(int(x[1]), x[2], x[3], x[4])
+            hr = HolidayRequest(int(x[0]), int(x[1]), x[2], x[3], x[4])
             match hr.status:
                 case "Status.APPROVED":
                     hr.status = Status.APPROVED
@@ -86,8 +86,8 @@ class Database:
         cursor.execute(sqlCommand)
         mydb.commit()
 
-    def changeStateOfRequest(mydb, request):
+    def changeStateOfRequest(mydb, requestID, status):
         cursor = mydb.cursor()
-        sqlCommand = "UPDATE pto_requests SET Status = '"+str(request.status)+"' where (UserID = '"+str(request.userID)+"' AND Start = '"+str(request.startDate)+"' AND End = '"+str(request.endDate)+"');"
+        sqlCommand = "UPDATE pto_requests SET Status = '"+str(status)+"' where requestID = '"+str(requestID)+"';"
         cursor.execute(sqlCommand)
         mydb.commit()
