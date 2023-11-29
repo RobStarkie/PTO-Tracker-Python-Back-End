@@ -74,10 +74,11 @@ class Database:
         cursor = mydb.cursor()
         info = []
         info.append(email)
-        sqlCommand = "SELECT Email FROM users WHERE (Email = %s);"
+        sqlCommand = "SELECT * FROM users WHERE (Email = %s);"
         cursor.execute(sqlCommand, info)
         result = cursor.fetchone()
-        return result
+        tempUser = User(int(result[0]), result[1], result[2], result[3],result[4], result[5], int(result[6]), int(result[7]), int(result[8]), int(result[9]))
+        return tempUser
 
     
     def updateUserInfoPassword(mydb, userID, password):

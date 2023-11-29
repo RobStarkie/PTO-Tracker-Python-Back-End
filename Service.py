@@ -21,7 +21,9 @@ class Service:
             newPassword = ''.join(random.choice(letters) for i in range(10))
             email_sender = 'trackerpto@gmail.com'
             email_password = 'fdlsrxyzibrzjmyl'
-            email_reciever = Database.forgottenPassword(mydb, email)
+            user = Database.forgottenPassword(mydb, email)
+            print(user)
+            email_reciever = user.email
             subject = "New Password"
             body = """Your new password is: """+newPassword
             em = EmailMessage()
@@ -33,6 +35,7 @@ class Service:
             with smtplib.SMTP_SSL('smtp.gmail.com',465, context=context) as smtp:
                 smtp.login(email_sender, email_password)
                 smtp.sendmail(email_sender, email_reciever, em.as_string())
+            Database.updateUserInfoPassword(mydb, user.userID, newPassword)
             return True
         except  TypeError:
             print("TypeError: Email doesn't exist")

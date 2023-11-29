@@ -44,10 +44,13 @@ def test_loginIncorrectVariableTypes():
 
 def test_forgottenPassword():
     mydb = Database.connectToDB()
+    initalUser = Database.getUserFromUserTable(mydb, 4)
+    initialPassword = initalUser.password
     testUser = User(4,"trackerpto@gmail.com", "Rob", "Stark","das", "picture", 12333446, False, 1278654, 25 )
     Database.addNewUserToDB(mydb, testUser)
     result = Service.forgottenPassword("trackerpto@gmail.com")
-
+    user = Database.getUserFromUserTable(mydb, 4)
+    assert (initialPassword != user.password)
     assert(result==True)
 
 def test_forgottenPasswordIncorrectEmail():
