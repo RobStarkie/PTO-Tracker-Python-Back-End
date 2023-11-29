@@ -2,6 +2,7 @@ CREATE DATABASE IF NOT EXISTS hr_management;
 USE hr_management;
 CREATE TABLE IF NOT EXISTS users (
     UserID VARCHAR(255) PRIMARY KEY,
+    TeamID VARCHAR(255),
     Email VARCHAR(255) UNIQUE,
     FirstName VARCHAR(255),
     SecondName VARCHAR(255),
@@ -19,11 +20,5 @@ CREATE TABLE IF NOT EXISTS pto_requests (
     End DATE,
     Status VARCHAR(255),
     PRIMARY KEY (RequestID),
-    FOREIGN KEY (UserID) REFERENCES users(UserID)
-);
-
-CREATE TABLE IF NOT EXISTS teams (
-    TeamID VARCHAR(255) PRIMARY KEY,
-    UserID VARCHAR(255),
     FOREIGN KEY (UserID) REFERENCES users(UserID)
 );
