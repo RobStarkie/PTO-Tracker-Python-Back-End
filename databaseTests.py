@@ -1,7 +1,7 @@
 
 import datetime
 from Database import *
-from User import *
+from user import *
 from Status import *
 
 

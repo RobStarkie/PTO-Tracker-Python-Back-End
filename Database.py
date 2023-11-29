@@ -1,5 +1,5 @@
 import mysql.connector
-from User import *
+from user import *
 from HolidayRequest import *
 from Status import *
 
@@ -8,7 +8,7 @@ class Database:
         mydb = mysql.connector.connect(
         host="localhost",
         user="root",
-        password="password123",
+        password="AquaductStreet9",
         database = 'hr_management'
         )
         return mydb
@@ -69,6 +69,16 @@ class Database:
             lineManager=True
         tempUser = User(int(result[0]), result[1], result[2], result[3],result[4], result[5], int(result[6]), lineManager, int(result[8]), int(result[9]))
         return tempUser
+    
+    def forgottenPassword(mydb, email):
+        cursor = mydb.cursor()
+        info = []
+        info.append(email)
+        sqlCommand = "SELECT Email FROM users WHERE (Email = %s);"
+        cursor.execute(sqlCommand, info)
+        result = cursor.fetchone()
+        return result
+
     
     def updateUserInfoPassword(mydb, userID, password):
         cursor = mydb.cursor()
