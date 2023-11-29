@@ -58,3 +58,15 @@ def test_forgottenPasswordIncorrectEmail():
     result = Service.forgottenPassword("tes@test.com")
 
     assert(result==False)
+
+def test_getUserHolidayRequests():
+    userID = 3
+    holidayRequests = Service.getUserHolidayRequests(userID)
+
+    assert(holidayRequests[0].requestID == 4)
+    assert(holidayRequests[1].requestID == 6)
+
+def test_getUserHolidayRequestsIncorrectUserID():
+    userID = 5555555555
+    holidayRequests = Service.getUserHolidayRequests(userID)
+    assert(holidayRequests == [])

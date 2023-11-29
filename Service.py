@@ -40,5 +40,13 @@ class Service:
         except  TypeError:
             print("TypeError: Email doesn't exist")
             return False
+        
+    def getUserHolidayRequests(userID):
+        mydb = Database.connectToDB()
+        try:
+            holidayRequests = Database.getPTORequest(mydb, userID)
+            return holidayRequests
+        except TypeError:
+            return False
 
             
