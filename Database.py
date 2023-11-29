@@ -8,7 +8,7 @@ class Database:
         mydb = mysql.connector.connect(
         host="localhost",
         user="root",
-        password="AquaductStreet9",
+        password="password123",
         database = 'hr_management'
         )
         return mydb
