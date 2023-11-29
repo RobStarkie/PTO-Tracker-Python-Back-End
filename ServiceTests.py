@@ -1,25 +1,27 @@
-import datetime
+from datetime import *
 from Database import *
 from user import *
 from Status import *
 from Service import *
 
 def test_loginUserFound():
-    testUser = User(1,"test@email.com", "Rob", "Stark","das", "picture", 12333446, False, 1278654, 25 )
+    testUser = User(1,1,"test@test.com","Rob","Stark","das","picture",12333446,False,1278654,25,False)
     userID = "1"
     password = "das"
     result = Service.login(userID, password)
 
     assert (testUser.userID ==result.userID)
+    assert (testUser.teamID ==result.teamID)
     assert (testUser.email ==result.email)
     assert (testUser.firstName ==result.firstName)
     assert (testUser.secondName ==result.secondName)
-    assert (testUser.password == result.password)
+    assert (testUser.password ==result.password)
     assert (testUser.profilePicture ==result.profilePicture)
     assert (testUser.phoneNumber ==result.phoneNumber)
     assert (testUser.lineManager ==result.lineManager)
     assert (testUser.lineManagerID ==result.lineManagerID)
     assert (testUser.totalHolidays ==result.totalHolidays)
+    assert (testUser.admin ==result.admin)
 
 def test_loginNoUserFound():
     #incorrect userID, correct password
@@ -44,14 +46,12 @@ def test_loginIncorrectVariableTypes():
 
 def test_forgottenPassword():
     mydb = Database.connectToDB()
-    initalUser = Database.getUserFromUserTable(mydb, 4)
-    initialPassword = initalUser.password
-    testUser = User(4,"trackerpto@gmail.com", "Rob", "Stark","das", "picture", 12333446, False, 1278654, 25 )
-    Database.addNewUserToDB(mydb, testUser)
-    result = Service.forgottenPassword("trackerpto@gmail.com")
-    user = Database.getUserFromUserTable(mydb, 4)
-    assert (initialPassword != user.password)
-    assert(result==True)
+    initalUser = User(4,2,"trackerpto@gmail.com", "James", "May","TopGear", "picture", 12333446, False, 1278654, 25,False )
+    Service.addNewUser(initalUser)
+    result = Service.forgottenPassword(initalUser.email)
+    editedUser = Database.getUserFromUserTable(mydb, 4)
+    assert (initalUser.password != editedUser.password)
+    assert (result == True)
 
 def test_forgottenPasswordIncorrectEmail():
     mydb = Database.connectToDB()
@@ -63,10 +63,51 @@ def test_getUserHolidayRequests():
     userID = 3
     holidayRequests = Service.getUserHolidayRequests(userID)
 
-    assert(holidayRequests[0].requestID == 4)
-    assert(holidayRequests[1].requestID == 6)
+    assert(holidayRequests[0].requestID == 3)
+    assert(holidayRequests[1].requestID == 4)
 
 def test_getUserHolidayRequestsIncorrectUserID():
     userID = 5555555555
     holidayRequests = Service.getUserHolidayRequests(userID)
     assert(holidayRequests == [])
+
+def test_generateNewPassword():
+    password = Service.generateNewPassword()
+    assert (password is not None)
+
+def test_editMyAccount():
+    newPassword = Service.generateNewPassword()
+    testUser = User(5,1,"testEmail@email.com", "Jeremy", "Clarkson", "GrandTour", "picture", 12333446, False, 1278654, 25 , False)
+    Service.addNewUser(testUser)
+    result = Service.editUserAccountByUser(testUser.userID, newPassword)
+    mydb = Database.connectToDB()
+    updatedUser = Database.getUserFromUserTable(mydb, 5)
+    assert (updatedUser.password == newPassword)
+    
+def test_newHolidayRequest():
+    hr = HolidayRequest(None,3,"2019-06-22","2019-06-25",Status.APPROVED)
+    Service.addNewHolidayRequest(hr)
+    result = Service.getUserHolidayRequests(3)
+    assert (hr.userID == result[1].userID)
+    assert (datetime.date(2019,6,22) == result[1].startDate)
+    assert (datetime.date(2019,6,25) == result[1].endDate)
+    assert (hr.status == result[1].status)
+
+def test_newHolidayRequestIncorrectDateFormate1():
+    hr = HolidayRequest(None,4,"15-6-2020","2019-6-16",Status.APPROVED)
+    result = Service.addNewHolidayRequest(hr)
+    assert(result==False)
+
+def test_newHolidayRequestIncorrectDateFormate2():
+    hr = HolidayRequest(None,4,"15","2019-6-16",Status.APPROVED)
+    result = Service.addNewHolidayRequest(hr)
+    assert(result==False)
+
+def test_newHolidayRequestIncorrectDateFormate3():
+    hr = HolidayRequest(None,4,"s","2019-6-16",Status.APPROVED)
+    result = Service.addNewHolidayRequest(hr)
+    assert(result==False)
+
+
+
+

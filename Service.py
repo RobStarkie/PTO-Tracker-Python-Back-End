@@ -1,4 +1,6 @@
+import datetime
 import random
+import re
 import string
 from Database import *
 from email.message import EmailMessage
@@ -13,12 +15,35 @@ class Service:
             print("TypeError: User Details incorrect")
             return False
         return result
+    
+    def addNewUser(user):
+        mydb = Database.connectToDB()
+        if Service.checkEmail(user.email)==False:
+            return False
+        
+        try:
+            if Database.searchUser(mydb, user.userID) == False:
+                Database.addNewUserToDB(mydb, user)
+                return True
+            else:
+                return False
+        except TypeError:
+            return False
+
+    def checkEmail(email):
+        regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
+        if(re.fullmatch(regex, email)):
+            return True
+            print("Valid Email")
+    
+        else:
+            return False
+            print("Invalid Email")
 
     def forgottenPassword(email):
         mydb = Database.connectToDB()
         try:
-            letters = string.ascii_lowercase
-            newPassword = ''.join(random.choice(letters) for i in range(10))
+            newPassword = Service.generateNewPassword()
             email_sender = 'trackerpto@gmail.com'
             email_password = 'fdlsrxyzibrzjmyl'
             user = Database.forgottenPassword(mydb, email)
@@ -41,6 +66,12 @@ class Service:
             print("TypeError: Email doesn't exist")
             return False
         
+    def generateNewPassword():
+        letters = string.ascii_lowercase
+        password = ''.join(random.choice(letters) for i in range(10))
+        return password
+        
+        
     def getUserHolidayRequests(userID):
         mydb = Database.connectToDB()
         try:
@@ -48,5 +79,49 @@ class Service:
             return holidayRequests
         except TypeError:
             return False
-
-            
+        
+    def editUserAccountByUser(userID, password):
+        mydb = Database.connectToDB()
+        try:
+            Database.updateUserInfoPassword(mydb, userID, password)
+            return True
+        except TypeError:
+            return False
+    
+    def addNewHolidayRequest(hr):
+        mydb = Database.connectToDB()
+        if (Service.validateDate(hr.startDate) == True) and (Service.validateDate(hr.endDate) == True):
+            hr.startDate = Service.insertDateIntoDatetime(hr.startDate)
+            hr.endDate = Service.insertDateIntoDatetime(hr.endDate)
+            print(hr.startDate)
+            print(hr.endDate)
+            try:
+                Database.addNewPTORequest(mydb, hr)
+                return True
+            except TypeError:
+                return False
+        else:
+            #incorrect formate
+            return False
+        
+    def validateDate(date):
+        print(date)
+        res = False
+        try:
+            res = bool(datetime.date.fromisoformat(date))
+        except ValueError:
+            print("Incorrect Date Format")
+            res = False
+        return res
+    
+    def insertDateIntoDatetime(passedDate):
+        passedDate = passedDate.split("-")
+        year = int(passedDate[0])
+        month = int(passedDate[1])
+        day = int(passedDate[2])
+        try:
+            passedDate = datetime.date(year,month,day)
+            print(passedDate)
+            return passedDate
+        except ValueError:
+            return False

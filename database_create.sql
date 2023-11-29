@@ -11,7 +11,8 @@ CREATE TABLE IF NOT EXISTS users (
     PhoneNumber VARCHAR(20),
     LineManager BOOLEAN,
     LineManagerID VARCHAR(255),
-    TotalHolidays INT
+    TotalHolidays INT,
+    Admin BOOLEAN
 );
 CREATE TABLE IF NOT EXISTS pto_requests (
     RequestID int NOT NULL AUTO_INCREMENT,
