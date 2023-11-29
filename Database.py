@@ -23,13 +23,25 @@ class Database:
             cursor.execute(command)
 
     def addNewUserToDB(mydb, user):
-        lineManager=0
+        info = []
+        info.append(user.userID)
+        info.append(user.email)
+        info.append(user.firstName)
+        info.append(user.secondName)
+        info.append(user.password)
+        info.append(user.profilePicture)
+        info.append(user.phoneNumber) 
         if user.lineManager == True:
-            lineManager=1
-        sqlCommand = "INSERT INTO users (UserID, Email, FirstName, SecondName, Password, ProfilePicture, PhoneNumber, LineManager, LineManagerID, TotalHolidays) SELECT * FROM (SELECT '"+str(user.userID)+"','"+user.email+"','"+user.firstName+"','"+user.secondName+"','"+user.password+"','"+user.profilePicture+"','"+str(user.phoneNumber)+"','"+str(lineManager)+"','"+str(user.lineManagerID)+"','"+str(user.totalHolidays)+"'"+") AS tmp WHERE NOT EXISTS (SELECT UserID FROM users WHERE UserID = "+str(user.userID)+") LIMIT 1;"
+            info.append(1)
+        else:
+             info.append(0)
+        info.append(user.lineManagerID)
+        info.append(user.totalHolidays)
+        info.append(user.userID)
+        sqlCommand = "INSERT INTO users (UserID, Email, FirstName, SecondName, Password, ProfilePicture, PhoneNumber, LineManager, LineManagerID, TotalHolidays) SELECT * FROM (SELECT %s,%s,%s,%s,%s,%s,%s,%s,%s,%s) AS tmp WHERE NOT EXISTS (SELECT UserID FROM users WHERE UserID =%s) LIMIT 1;"
         print(sqlCommand)
         cursor = mydb.cursor()
-        cursor.execute(sqlCommand)
+        cursor.execute(sqlCommand, info)
         mydb.commit()
 
     def getUserFromUserTable(mydb, userID):
@@ -43,22 +55,50 @@ class Database:
             lineManager=True
         tempUser = User(int(result[0]), result[1], result[2], result[3],result[4], result[5], int(result[6]), lineManager, int(result[8]), int(result[9]))
         return tempUser
+
+    def getUserFromUserTableForLogin(mydb, userID, password):
+        cursor = mydb.cursor()
+        info = []
+        info.append(userID)
+        info.append(password)
+        sqlCommand = "SELECT * FROM users WHERE (UserID = %s AND Password = %s);"
+        cursor.execute(sqlCommand, info)
+        result = cursor.fetchone()
+        lineManager=False
+        if result[7] == "1":
+            lineManager=True
+        tempUser = User(int(result[0]), result[1], result[2], result[3],result[4], result[5], int(result[6]), lineManager, int(result[8]), int(result[9]))
+        return tempUser
     
     def updateUserInfoPassword(mydb, userID, password):
         cursor = mydb.cursor()
-        sqlCommand = "UPDATE users SET Password = '"+password+"' WHERE UserID = '"+str(userID)+"';"
-        print(sqlCommand)
-        cursor.execute(sqlCommand)
+        info = []
+        info.append(password)
+        info.append(userID)
+        sqlCommand = "UPDATE users SET Password = %s WHERE UserID = %s;"
+        print(sqlCommand, info)
+        cursor.execute(sqlCommand, info)
         mydb.commit()
 
     def updateEntireUser(mydb, user):
-        lineManager=0
+        info = []
+        info.append(user.email)
+        info.append(user.firstName)
+        info.append(user.secondName)
+        info.append(user.password)
+        info.append(user.profilePicture)
+        info.append(user.phoneNumber) 
         if user.lineManager == True:
-            lineManager=1
-        sqlCommand = "UPDATE users SET Email = '"+user.email+"', FirstName = '"+user.firstName+"', SecondName= '"+user.secondName+"',  Password= '"+user.password+"',  ProfilePicture = '"+user.profilePicture+"', PhoneNumber = '"+str(user.phoneNumber)+"', LineManager = '"+str(lineManager)+"', LineManagerID = '"+str(user.lineManagerID)+"', TotalHolidays = '"+str(user.totalHolidays)+"' WHERE UserID = '"+str(user.userID)+"';"
+            info.append(1)
+        else:
+            info.append(0)
+        info.append(user.lineManagerID)
+        info.append(user.totalHolidays)
+        info.append(user.userID)
+        sqlCommand = "UPDATE users SET Email = %s, FirstName = %s, SecondName= %s,  Password= %s,  ProfilePicture = %s, PhoneNumber = %s, LineManager = %s, LineManagerID = %s, TotalHolidays = %s WHERE UserID = %s;"
         print(sqlCommand)
         cursor = mydb.cursor()
-        cursor.execute(sqlCommand)
+        cursor.execute(sqlCommand, info)
         mydb.commit()
 
     def getPTORequest(mydb, userID):

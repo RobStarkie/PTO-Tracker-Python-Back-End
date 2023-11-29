@@ -26,6 +26,29 @@ def test_createAddingAndRetrievingUserFromUserTable():
     assert (testUser.lineManagerID ==result.lineManagerID)
     assert (testUser.totalHolidays ==result.totalHolidays)
 
+def test_login():
+    mydb = Database.connectToDB()
+    testUser = User(1,"test@email.com", "Rob", "Stark","das", "picture", 12333446, False, 1278654, 25 )
+    result = Database.getUserFromUserTableForLogin(mydb, 1, "das")
+    assert (testUser.userID ==result.userID)
+    assert (testUser.email ==result.email)
+    assert (testUser.firstName ==result.firstName)
+    assert (testUser.secondName ==result.secondName)
+    assert (testUser.password ==result.password)
+    assert (testUser.profilePicture ==result.profilePicture)
+    assert (testUser.phoneNumber ==result.phoneNumber)
+    assert (testUser.lineManager ==result.lineManager)
+    assert (testUser.lineManagerID ==result.lineManagerID)
+    assert (testUser.totalHolidays ==result.totalHolidays)
+
+def test_loginSQLIjection():
+    mydb = Database.connectToDB()
+    try:
+        result = Database.getUserFromUserTableForLogin(mydb, 1, "das; DROP Table users")
+    except  TypeError:
+        result = False
+    assert (result == False)
+
 def test_changeUserPassword():
     mydb = Database.connectToDB()
     newPassword = "hagen"
