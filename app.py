@@ -1,17 +1,19 @@
 from flask import Flask
-app = Flask(__name__)
 from Database import *
 import json
 from flask import Flask, request, jsonify
 from datetime import datetime, timedelta, timezone
 from flask_jwt_extended import create_access_token,get_jwt,get_jwt_identity, \
                                unset_jwt_cookies, jwt_required, JWTManager
+from flask_cors import CORS, cross_origin
 
 mydb = Database.connectToDB()
 Database.createTables(mydb)
 
+app = Flask(__name__)
 app.config["JWT_SECRET_KEY"] = "please-remember-to-change-me"
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)
+CORS(app)
 jwt = JWTManager(app)
 
 @app.after_request
