@@ -125,3 +125,18 @@ class Service:
             return passedDate
         except ValueError:
             return False
+        
+    def getTeamMembers(userID):
+        mydb = Database.connectToDB()
+        try:
+            user = Database.getUserFromUserTable(mydb, userID)
+            print(user.lineManager)
+            if user.lineManager== True:
+                teamMembers = Database.getTeamMembers(mydb, userID)
+                return teamMembers
+            else:
+                print("userID isnt a line manager")
+                return False
+        except TypeError:
+            print("incorrect userID")
+            return False
