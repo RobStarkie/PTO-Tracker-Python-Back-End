@@ -1,8 +1,6 @@
 from flask import Flask
 from Database import *
-from Database import Database
 import json
-from flask import Flask, request, jsonify
 from flask import Flask, request, jsonify, Response
 from datetime import datetime, timedelta, timezone
 from flask_jwt_extended import create_access_token,get_jwt,get_jwt_identity, \
@@ -13,7 +11,7 @@ import json
 
 app = Flask(__name__)
 app.config["JWT_SECRET_KEY"] = "please-remember-to-change-me"
-app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=2)
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)
 CORS(app)
 jwt = JWTManager(app)
 
@@ -38,18 +36,13 @@ def refresh_expiring_jwts(response):
 def create_token():
     email = request.json.get("email", None)
     password = request.json.get("password", None)
-    admin = False
     try:
-        
         if Service.login(email, password)==False:
             return {"msg": "Wrong email or password"}, 401
-        user=Service.getUserByEmail(email)
-        if user.admin ==True:
-            admin = True
     except TypeError:
         return {"msg": "Wrong email or password"}, 401
     access_token = create_access_token(identity=email)
-    response = {"access_token":access_token, "admin": admin}
+    response = {"access_token":access_token}
     return response
 
 @app.route("/logout", methods=["POST"])
@@ -91,7 +84,7 @@ def getHolidays():
 @app.route("/addNewHolidayRequest", methods =["POST"])
 @jwt_required()
 def addNewHolidayRequest():
-
+    
     try:
         startDate = request.json.get("startDate", None)
         endDate = request.json.get("endDate", None)
@@ -109,76 +102,7 @@ def addNewHolidayRequest():
     except TypeError:
         print(TypeError)
         return {"msg": "Couldnt add holiday request: "+ TypeError}, 401
-    
-@app.route("/addNewUser", methods =["POST"])
-@jwt_required()
-def addNewUser():
-    try:
-        userID = request.json.get("userID")
-        TeamID = request.json.get("TeamID")
-        Email = request.json.get("Email")
-        FirstName = request.json.get("FirstName") 
-        SecondName = request.json.get("SecondName")
-        Password = request.json.get("Password")
-        ProfilePicture = request.json.get("ProfilePicture")
-        PhoneNumber = request.json.get("PhoneNumber")
-        LineManager = request.json.get("LineManager")
-        LineManagerID = request.json.get("LineManagerID")
-        TotalHolidays = request.json.get("TotalHolidays")
-        Admin = request.json.get("Admin")
-        user = User(userID, TeamID, Email, FirstName, SecondName, Password, ProfilePicture, PhoneNumber, LineManager, LineManagerID, TotalHolidays, Admin)
-        Service.addNewUser(user)
-        return {"msg": "Added new user"}, 200
-    except TypeError:
-        return {"msg": "Failed to add new user" + TypeError}, 401
-    
-@app.route("/getUser", methods =["POST"])
-@jwt_required()
-def getUser():
-    try:
-        userID = request.json.get("userID")
-        print(userID)
-        user = Service.getUserByID(userID)
-        response = {'UserID': user.userID, 'TeamID': user.teamID, 'Email': user.email, 'FirstName': user.firstName, 'SecondName': user.secondName, 'password': user.password, 'ProfilePicture': user.profilePicture, 'phoneNumber': user.phoneNumber, 'LineManager': user.lineManager, 'LineManagerID': user.lineManagerID, 'TotalHolidays': user.totalHolidays, 'Admin': user.admin}
-        return response
-    except TypeError:
-        print(TypeError)
-        return {"msg": "Couldnt edit user: "+ TypeError}, 401 
 
-@app.route("/editUser", methods =["POST"])
-@jwt_required()
-def editUser():
-    try:
-        userID = request.json.get("userID")
-        TeamID = request.json.get("TeamID")
-        Email = request.json.get("Email")
-        FirstName = request.json.get("FirstName") 
-        SecondName = request.json.get("SecondName")
-        Password = request.json.get("Password")
-        ProfilePicture = request.json.get("ProfilePicture")
-        PhoneNumber = request.json.get("PhoneNumber")
-        LineManager = request.json.get("LineManager")
-        LineManagerID = request.json.get("LineManagerID")
-        TotalHolidays = request.json.get("TotalHolidays")
-        Admin = request.json.get("Admin")
-        user = User(userID, TeamID, Email, FirstName, SecondName, Password, ProfilePicture, PhoneNumber, LineManager, LineManagerID, TotalHolidays, Admin)
-        print(user)
-        Service.updateEntireAccount(user)
-        return {"msg": "Edited existing account"}, 200
-    except TypeError:
-        return {"msg": "Failed to add new user"}, 401
-    
-@app.route("/editAccount", methods =["POST"])
-@jwt_required()
-def editPassword():
-    try:
-        password = request.json.get('password')
-        current_user = get_jwt_identity()
-        print(current_user)
-        print(password)
-        Service.editUserAccountByUser(current_user, password)
-    except TypeError:
-        return {"msg": "Failed to change password"}, 401
 
 
 from datetime import datetime, timedelta
@@ -192,13 +116,7 @@ def profile():
     return response
         
 
-@app.route("/make-holiday-request", methods=["GET"])
-@jwt_required()
-def count_work_hours():
-    start_date = request.json.get("start-date", None)
-    end_date = request.json.get("end-date", None)
-    work_hours_per_day = [8,8,8,8,5] #change this to get from db
-    total_holiday_hours = 137 #change this to get from db
+def count_work_hours(start_date, end_date, work_hours_per_day, total_holiday_hours):
     bank_holidays = BankHolidays()
     holidays = {holiday['date'] for holiday in bank_holidays.get_holidays()}
 
@@ -213,7 +131,7 @@ def count_work_hours():
         # Move to the next day
         current_date += timedelta(days=1)
 
-    return total_holiday_hours - total_work_hours #holiday hours remaining
+    return total_holiday_hours - total_work_hours
 
 """# Example usage:
 start_date = datetime(2023, 1, 1)  # Replace with your start date
