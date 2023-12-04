@@ -116,7 +116,13 @@ def profile():
     return response
         
 
-def count_work_hours(start_date, end_date, work_hours_per_day, total_holiday_hours):
+@app.route("/make-holiday-request", methods=["GET"])
+@jwt_required()
+def count_work_hours():
+    start_date = request.json.get("start-date", None)
+    end_date = request.json.get("end-date", None)
+    work_hours_per_day = [8,8,8,8,5] #change this to get from db
+    total_holiday_hours = 137 #change this to get from db
     bank_holidays = BankHolidays()
     holidays = {holiday['date'] for holiday in bank_holidays.get_holidays()}
 
@@ -131,7 +137,7 @@ def count_work_hours(start_date, end_date, work_hours_per_day, total_holiday_hou
         # Move to the next day
         current_date += timedelta(days=1)
 
-    return total_holiday_hours - total_work_hours
+    return total_holiday_hours - total_work_hours #holiday hours remaining
 
 """# Example usage:
 start_date = datetime(2023, 1, 1)  # Replace with your start date
