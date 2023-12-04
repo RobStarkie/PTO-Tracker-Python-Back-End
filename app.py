@@ -54,6 +54,14 @@ def logout():
 from datetime import datetime, timedelta
 from govuk_bank_holidays.bank_holidays import BankHolidays
 
+@app.route("/profile", methods=["GET"])
+@jwt_required()
+def profile():
+    identity=get_jwt_identity()
+    response = jsonify({"user":identity})
+    return response
+        
+
 def count_work_hours(start_date, end_date, work_hours_per_day, total_holiday_hours):
     bank_holidays = BankHolidays()
     holidays = {holiday['date'] for holiday in bank_holidays.get_holidays()}
