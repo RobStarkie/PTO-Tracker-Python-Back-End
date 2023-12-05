@@ -11,9 +11,6 @@ from flask_cors import CORS, cross_origin
 from Service import *
 import json
 
-mydb = Database.connectToDB()
-Database.createTables(mydb)
-
 app = Flask(__name__)
 app.config["JWT_SECRET_KEY"] = "please-remember-to-change-me"
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=2)
