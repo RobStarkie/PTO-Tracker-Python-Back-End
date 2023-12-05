@@ -4,6 +4,7 @@ from HolidayRequest import *
 from Status import *
 
 class Database:
+    @staticmethod
     def connectToDB():
         mydb = mysql.connector.connect(
         host="localhost",
@@ -85,6 +86,10 @@ class Database:
         sqlCommand = "SELECT * FROM users WHERE (UserID = %s AND Password = %s);"
         cursor.execute(sqlCommand, info)
         result = cursor.fetchone()
+        cursor.close()
+        if result is None:
+            return {"msg": "User with this Id and password does not exist"}
+        
         lineManager=False
         if result[8] == 1:
             lineManager=True
@@ -94,6 +99,17 @@ class Database:
         print(result)
         tempUser = User(int(result[0]), int(result[1]), result[2], result[3],result[4], result[5], result[6], int(result[7]), lineManager, int(result[9]), int(result[10]), Admin)
         return tempUser
+    
+    def get_user_id_from_email(mydb, email):
+        cursor = mydb.cursor()
+        cursor.execute("SELECT UserID FROM users WHERE Email = %s", (email,))
+        result = cursor.fetchone()
+        cursor.close()
+
+        if result:
+            return result[0]  # Return the UserID
+        else:
+            return None  # No user found with this email
     
     def forgottenPassword(mydb, email):
         cursor = mydb.cursor()
