@@ -6,22 +6,11 @@ from Service import *
 
 def test_loginUserFound():
     testUser = User(1,1,"test@test.com","Rob","Stark","das","picture",12333446,False,1278654,25,False)
-    userID = "1"
+    email = "test@test.com"
     password = "das"
-    result = Service.login(userID, password)
+    result = Service.login(email, password)
 
-    assert (testUser.userID ==result.userID)
-    assert (testUser.teamID ==result.teamID)
-    assert (testUser.email ==result.email)
-    assert (testUser.firstName ==result.firstName)
-    assert (testUser.secondName ==result.secondName)
-    assert (testUser.password ==result.password)
-    assert (testUser.profilePicture ==result.profilePicture)
-    assert (testUser.phoneNumber ==result.phoneNumber)
-    assert (testUser.lineManager ==result.lineManager)
-    assert (testUser.lineManagerID ==result.lineManagerID)
-    assert (testUser.totalHolidays ==result.totalHolidays)
-    assert (testUser.admin ==result.admin)
+    assert (result==True)
 
 def test_loginNoUserFound():
     #incorrect userID, correct password

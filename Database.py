@@ -8,7 +8,7 @@ class Database:
         mydb = mysql.connector.connect(
         host="localhost",
         user="root",
-        password="password123",
+        password="AquaductStreet9",
         database = 'hr_management'
         )
         return mydb
@@ -76,14 +76,14 @@ class Database:
         print(result)
         tempUser = User(int(result[0]), int(result[1]), result[2], result[3],result[4], result[5], result[6], int(result[7]), lineManager, int(result[9]), int(result[10]), Admin)
         return tempUser
-
-    def getUserFromUserTableForLogin(mydb, userID, password):
+    
+    def getUserFromUserTableEmail(mydb, email):
+        print("getuser")
+        list = []
+        list.append(email)
         cursor = mydb.cursor()
-        info = []
-        info.append(userID)
-        info.append(password)
-        sqlCommand = "SELECT * FROM users WHERE (UserID = %s AND Password = %s);"
-        cursor.execute(sqlCommand, info)
+        sqlCommand = "SELECT * FROM users WHERE Email = %s;"
+        cursor.execute(sqlCommand, list)
         result = cursor.fetchone()
         lineManager=False
         if result[8] == 1:
@@ -94,6 +94,27 @@ class Database:
         print(result)
         tempUser = User(int(result[0]), int(result[1]), result[2], result[3],result[4], result[5], result[6], int(result[7]), lineManager, int(result[9]), int(result[10]), Admin)
         return tempUser
+
+    def getUserFromUserTableForLogin(mydb, email, password):
+        cursor = mydb.cursor()
+        info = []
+        info.append(email)
+        info.append(password)
+        sqlCommand = "SELECT * FROM users WHERE (Email = %s AND Password = %s);"
+        cursor.execute(sqlCommand, info)
+        result = cursor.fetchone()
+        lineManager=False
+        if result[8] == 1:
+            lineManager=True
+        Admin = False
+        if result[11] == 1:
+            Admin = True
+        print(result)
+        tempUser = User(int(result[0]), int(result[1]), result[2], result[3],result[4], result[5], result[6], int(result[7]), lineManager, int(result[9]), int(result[10]), Admin)
+        if (tempUser.email == email):
+            return True
+        else:
+            return False
     
     def forgottenPassword(mydb, email):
         cursor = mydb.cursor()
@@ -165,7 +186,6 @@ class Database:
                 case "Status.REVIEW":
                     hr.status = Status.REVIEW
             list.append(hr)
-
         return list
     
     def addNewPTORequest(mydb, request):

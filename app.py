@@ -1,11 +1,13 @@
 from flask import Flask
 from Database import *
 import json
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Response
 from datetime import datetime, timedelta, timezone
 from flask_jwt_extended import create_access_token,get_jwt,get_jwt_identity, \
                                unset_jwt_cookies, jwt_required, JWTManager
 from flask_cors import CORS, cross_origin
+from Service import *
+import json
 
 mydb = Database.connectToDB()
 Database.createTables(mydb)
@@ -37,18 +39,73 @@ def refresh_expiring_jwts(response):
 def create_token():
     email = request.json.get("email", None)
     password = request.json.get("password", None)
-    if email != "test" or password != "test":
+    try:
+        if Service.login(email, password)==False:
+            return {"msg": "Wrong email or password"}, 401
+    except TypeError:
         return {"msg": "Wrong email or password"}, 401
-
     access_token = create_access_token(identity=email)
     response = {"access_token":access_token}
     return response
 
 @app.route("/logout", methods=["POST"])
 def logout():
+    current_user = get_jwt_identity()
+    print(logged_in_as=current_user)
     response = jsonify({"msg": "logout successful"})
     unset_jwt_cookies(response)
     return response
+
+
+
+@app.route("/getHolidays", methods =["GET"])
+@jwt_required()
+def getHolidays():
+    print("getting holidays")
+    current_user = get_jwt_identity()
+    print(current_user)
+    user = Service.getUserByEmail(current_user)
+    print("userID: "+str(user.userID))
+    hr = Service.getUserHolidayRequests(user.userID)
+    print("hr: ")
+    print(hr[0].requestID)
+    #hr = np.array(hr)
+    print(hr)
+    list = []
+    for x in hr:
+        a = x.userID
+        list.append(a)
+        b = x.startDate.strftime("%Y-%m-%d")
+        list.append(b)
+        c = x.endDate.strftime("%Y-%m-%d")
+        list.append(c)
+        d = x.status.name
+        list.append(d)
+    print(list)
+    return json.dumps(list)
+
+@app.route("/addNewHolidayRequest", methods =["POST"])
+@jwt_required()
+def addNewHolidayRequest():
+    
+    try:
+        startDate = request.json.get("startDate", None)
+        endDate = request.json.get("endDate", None)
+        date1 = datetime.strptime(startDate, '%Y-%m-%d').date()
+        date2 = datetime.strptime(endDate, '%Y-%m-%d').date()
+        if(date1<=date2):
+            current_user = get_jwt_identity()
+            user = Service.getUserByEmail(current_user)
+            hr = HolidayRequest(None, user.userID, startDate, endDate, Status.REVIEW)
+            Service.addNewHolidayRequest(hr)
+            return {"msg": "New Holiday Request Added"}, 200
+            return {"msg": "Date is goof"}, 200
+        else:
+            return{"msg": "Dates are incorrect"}, 500            
+    except TypeError:
+        print(TypeError)
+        return {"msg": "Couldnt add holiday request: "+ TypeError}, 401
+
 
 
 from datetime import datetime, timedelta
