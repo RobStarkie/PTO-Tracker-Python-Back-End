@@ -39,6 +39,7 @@ This repository has been created to work with our React front end for a PTO Trac
 2. Open MySQL Workbench and set up a new connection to the local MySQL server.
 
 ### Setup
+
 1. Create test data in the backend
     ```sh
    pytest .\databaseTests.py
