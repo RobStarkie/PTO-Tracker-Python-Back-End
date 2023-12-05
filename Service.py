@@ -7,14 +7,16 @@ from email.message import EmailMessage
 import ssl
 import smtplib
 class Service:
-    def login(userID, password):
+    def login(email, password):
         mydb = Database.connectToDB()
         try:
-            result = Database.getUserFromUserTableForLogin(mydb, userID, password)
+            result = Database.getUserFromUserTableForLogin(mydb, email, password)
+            if result == True:
+                return True
         except  TypeError:
             print("TypeError: User Details incorrect")
             return False
-        return result
+        return False
     
     def addNewUser(user):
         mydb = Database.connectToDB()
@@ -70,6 +72,14 @@ class Service:
         letters = string.ascii_lowercase
         password = ''.join(random.choice(letters) for i in range(10))
         return password
+    
+    def getUserByEmail(email):
+        mydb = Database.connectToDB()
+        try:
+            tempUser = Database.getUserFromUserTableEmail(mydb, email)
+            return tempUser
+        except TypeError:
+            return False
         
         
     def getUserHolidayRequests(userID):
