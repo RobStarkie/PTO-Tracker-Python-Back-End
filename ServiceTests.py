@@ -108,6 +108,18 @@ def test_newHolidayRequestIncorrectDateFormate3():
     result = Service.addNewHolidayRequest(hr)
     assert(result==False)
 
+def test_getTeamMembers():
+    lineManager = User(1278654,1,"testtest@email.com", "Richard", "Hammond", "Crash", "picture", 12333446, True, 2321213, 25 , False)
+    teamMembers = Service.getTeamMembers(lineManager.userID)
+    print(teamMembers)
+    assert (teamMembers[0] == 1)
+    assert (teamMembers[1] == 2)
+    assert (teamMembers[2] == 4)
+    assert (teamMembers[3] == 5)
+
+
+
+
 
 
 

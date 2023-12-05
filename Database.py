@@ -68,7 +68,7 @@ class Database:
         cursor.execute(sqlCommand)
         result = cursor.fetchone()
         lineManager=False
-        if result[7] == 1:
+        if result[8] == 1:
             lineManager=True
         Admin = False
         if result[11] == 1:
@@ -86,7 +86,7 @@ class Database:
         cursor.execute(sqlCommand, info)
         result = cursor.fetchone()
         lineManager=False
-        if result[7] == 1:
+        if result[8] == 1:
             lineManager=True
         Admin = False
         if result[11] == 1:
@@ -103,7 +103,7 @@ class Database:
         cursor.execute(sqlCommand, info)
         result = cursor.fetchone()
         lineManager=False
-        if result[7] == 1:
+        if result[8] == 1:
             lineManager=True
         Admin = False
         if result[11] == 1:
@@ -179,3 +179,13 @@ class Database:
         sqlCommand = "UPDATE pto_requests SET Status = '"+str(status)+"' where requestID = '"+str(requestID)+"';"
         cursor.execute(sqlCommand)
         mydb.commit()
+
+    def getTeamMembers(mydb, userID):
+        cursor = mydb.cursor()
+        id = []
+        id.append(userID)
+        sqlCommand = "SELECT DISTINCT UserID FROM users WHERE LineManagerID = %s;"
+        cursor.execute(sqlCommand, id)
+        result = cursor.fetchall()
+        return [int(x[0]) for x in result]
+    
