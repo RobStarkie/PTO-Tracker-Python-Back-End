@@ -65,8 +65,8 @@ class Database:
     def getUserFromUserTable(mydb, userID):
         print("getuser")
         cursor = mydb.cursor()
-        sqlCommand = "SELECT * FROM users WHERE UserID = "+str(userID)+";"
-        cursor.execute(sqlCommand)
+        sqlCommand = "SELECT * FROM users WHERE UserID = %s;"
+        cursor.execute(sqlCommand, (userID,))
         result = cursor.fetchone()
         lineManager=False
         if result[8] == 1:
@@ -204,6 +204,26 @@ class Database:
             list.append(hr)
         return list
     
+    def getPTORequestDict(mydb, userID):
+        cursor = mydb.cursor()
+        sqlCommand = "SELECT * FROM pto_requests WHERE UserID = %s;"
+        cursor.execute(sqlCommand, (userID,))
+        result = cursor.fetchall()
+        holidayList = []
+        for x in result:
+            # Create a dictionary for each holiday request
+            holidayDict = {
+                'id': str(x[0]),
+                'status': x[4],  # Modify according to your table structure
+                'start': str(x[2]),
+                'end': str(x[3])
+            }
+            # Append the dictionary to the list
+            holidayList.append(holidayDict)
+
+        return holidayList
+
+    
     def addNewPTORequest(mydb, request):
         cursor = mydb.cursor()
         sqlCommand = "INSERT INTO pto_requests (UserID, Start, End, Status) SELECT * FROM ( SELECT '"+str(request.userID)+"' , '"+str(request.startDate)+"' , '"+str(request.endDate)+"' , '"+str(request.status)+"') AS tmp WHERE NOT EXISTS (SELECT * FROM pto_requests where UserID = '"+str(request.userID)+"' AND Start = '"+str(request.startDate)+"' AND End = '"+str(request.endDate)+"') LIMIT 1;"
@@ -215,6 +235,34 @@ class Database:
         sqlCommand = "UPDATE pto_requests SET Status = '"+str(status)+"' where requestID = '"+str(requestID)+"';"
         cursor.execute(sqlCommand)
         mydb.commit()
+
+    def getCurrentUserLineManagerID(mydb, userID):
+        cursor = mydb.cursor()
+        sqlCommand ="SELECT LineManagerID FROM users WHERE UserID = %s;"
+        cursor.execute(sqlCommand, (userID,))
+        result = cursor.fetchone()
+        return result[0] if result else None
+    
+    def getUserDetails(mydb, userID):
+        cursor = mydb.cursor()
+        sqlCommand = "SELECT UserID, FirstName, SecondName, Email, PhoneNumber, ProfilePicture FROM users WHERE UserID = %s;"
+        cursor.execute(sqlCommand, (userID,))
+        result = cursor.fetchone()
+        if result:
+            userDetails = {
+                'user': result[0],
+                'firstName': result[1],
+                'secondName': result[2],
+                'email': result[3],
+                'phoneNumber': result[4],
+                'profile_picture': result[5],
+                'holidays': []  # This will be populated later
+            }
+            return userDetails
+        else:
+            return None
+
+
 
     def getTeamMembers(mydb, userID):
         cursor = mydb.cursor()
