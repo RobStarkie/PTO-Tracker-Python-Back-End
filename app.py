@@ -39,12 +39,10 @@ def create_token():
     email = request.json.get("email", None)
     password = request.json.get("password", None)
     userId = Database.get_user_id_from_email(mydb, email)
-    print(userId)
 
     if userId is None:
         return {"msg": "User not found"}, 404
     user = Database.getUserFromUserTableForLogin(mydb, userId, password)
-    print(user)
     if isinstance(user, dict):
         return user, 401
 
@@ -71,7 +69,31 @@ def profile():
     identity=get_jwt_identity()
     response = jsonify({"user":identity})
     return response
-        
+
+
+@app.route('/api/team-view', methods=["GET"])
+@jwt_required()
+def get_team_holidays():    
+    userId = get_jwt_identity()
+    line_manager_id = Database.getCurrentUserLineManagerID(mydb, userId)
+    # Gets the line managerId for the current user
+    if line_manager_id is None:
+        return {"msg":"Line Manager not found for this user"}, 404
+
+    # Gets all users who are under lineManagers UserID
+    team_userids = Database.getTeamMembers(mydb, line_manager_id)
+    if not team_userids:
+        return {"msg": "No team members found for this Line Manager"}, 404
+    
+    team_details = []
+
+    for memberId in team_userids:
+        user_details = Database.getUserDetails(mydb, memberId)
+        if user_details:
+            user_details['holidays'] = Database.getPTORequestDict(mydb, memberId)
+            team_details.append(user_details)
+    return team_details
+
 
 @app.route("/make-holiday-request", methods=["GET"])
 @jwt_required()
