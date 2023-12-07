@@ -21,7 +21,7 @@ def test_addnewUser():
      
 def test_retrievingUserFromUserTable():
     mydb = Database.connectToDB()
-    testUser = User(1,1,"trackerpto@gmail.com","Rob","Stark","das","picture",12333446,False,1278654,25,False)
+    testUser = User(1,1,"test@test.com","Rob","Stark","das","picture",12333446,False,1278654,25,False)
     result = Database.getUserFromUserTable(mydb, 1)
     assert (testUser.userID ==result.userID)
     assert (testUser.teamID ==result.teamID)
@@ -39,7 +39,7 @@ def test_retrievingUserFromUserTable():
 def test_login():
     mydb = Database.connectToDB()
     testUser = User(1,1,"test@test.com","Rob","Stark","das","picture",12333446,False,1278654,25,False)
-    result = Database.getUserFromUserTableForLogin(mydb, 1, "das")
+    result = Database.getUserFromUserTableForLogin(mydb, "test@test.com", "das")
     assert (testUser.userID ==result.userID)
     assert (testUser.teamID ==result.teamID)
     assert (testUser.email ==result.email)
