@@ -150,12 +150,12 @@ class Database:
         return tempUser
 
     
-    def updateUserInfoPassword(mydb, userID, password):
+    def updateUserInfoPassword(mydb, email, password):
         cursor = mydb.cursor()
         info = []
         info.append(password)
-        info.append(userID)
-        sqlCommand = "UPDATE users SET Password = %s WHERE UserID = %s;"
+        info.append(email)
+        sqlCommand = "UPDATE users SET Password = %s WHERE Email = %s;"
         print(sqlCommand, info)
         cursor.execute(sqlCommand, info)
         mydb.commit()
@@ -224,4 +224,3 @@ class Database:
         cursor.execute(sqlCommand, id)
         result = cursor.fetchall()
         return [int(x[0]) for x in result]
-    

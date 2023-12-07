@@ -80,6 +80,14 @@ class Service:
             return tempUser
         except TypeError:
             return False
+    
+    def getUserByID(userID):
+        mydb = Database.connectToDB()
+        try:
+            tempUser = Database.getUserFromUserTable(mydb, userID)
+            return tempUser
+        except TypeError:
+            return False
         
         
     def getUserHolidayRequests(userID):
@@ -90,10 +98,18 @@ class Service:
         except TypeError:
             return False
         
-    def editUserAccountByUser(userID, password):
+    def editUserAccountByUser(email, password):
         mydb = Database.connectToDB()
         try:
-            Database.updateUserInfoPassword(mydb, userID, password)
+            Database.updateUserInfoPassword(mydb, email, password)
+            return True
+        except TypeError:
+            return False
+        
+    def updateEntireAccount(user):
+        mydb = Database.connectToDB()
+        try:
+            Database.updateEntireUser(mydb, user)
             return True
         except TypeError:
             return False

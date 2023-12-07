@@ -41,13 +41,18 @@ def refresh_expiring_jwts(response):
 def create_token():
     email = request.json.get("email", None)
     password = request.json.get("password", None)
+    admin = False
     try:
+        
         if Service.login(email, password)==False:
             return {"msg": "Wrong email or password"}, 401
+        user=Service.getUserByEmail(email)
+        if user.admin ==True:
+            admin = True
     except TypeError:
         return {"msg": "Wrong email or password"}, 401
     access_token = create_access_token(identity=email)
-    response = {"access_token":access_token}
+    response = {"access_token":access_token, "admin": admin}
     return response
 
 @app.route("/logout", methods=["POST"])
@@ -89,7 +94,7 @@ def getHolidays():
 @app.route("/addNewHolidayRequest", methods =["POST"])
 @jwt_required()
 def addNewHolidayRequest():
-    
+
     try:
         startDate = request.json.get("startDate", None)
         endDate = request.json.get("endDate", None)
@@ -107,7 +112,76 @@ def addNewHolidayRequest():
     except TypeError:
         print(TypeError)
         return {"msg": "Couldnt add holiday request: "+ TypeError}, 401
+    
+@app.route("/addNewUser", methods =["POST"])
+@jwt_required()
+def addNewUser():
+    try:
+        userID = request.json.get("userID")
+        TeamID = request.json.get("TeamID")
+        Email = request.json.get("Email")
+        FirstName = request.json.get("FirstName") 
+        SecondName = request.json.get("SecondName")
+        Password = request.json.get("Password")
+        ProfilePicture = request.json.get("ProfilePicture")
+        PhoneNumber = request.json.get("PhoneNumber")
+        LineManager = request.json.get("LineManager")
+        LineManagerID = request.json.get("LineManagerID")
+        TotalHolidays = request.json.get("TotalHolidays")
+        Admin = request.json.get("Admin")
+        user = User(userID, TeamID, Email, FirstName, SecondName, Password, ProfilePicture, PhoneNumber, LineManager, LineManagerID, TotalHolidays, Admin)
+        Service.addNewUser(user)
+        return {"msg": "Added new user"}, 200
+    except TypeError:
+        return {"msg": "Failed to add new user" + TypeError}, 401
+    
+@app.route("/getUser", methods =["POST"])
+@jwt_required()
+def getUser():
+    try:
+        userID = request.json.get("userID")
+        print(userID)
+        user = Service.getUserByID(userID)
+        response = {'UserID': user.userID, 'TeamID': user.teamID, 'Email': user.email, 'FirstName': user.firstName, 'SecondName': user.secondName, 'password': user.password, 'ProfilePicture': user.profilePicture, 'phoneNumber': user.phoneNumber, 'LineManager': user.lineManager, 'LineManagerID': user.lineManagerID, 'TotalHolidays': user.totalHolidays, 'Admin': user.admin}
+        return response
+    except TypeError:
+        print(TypeError)
+        return {"msg": "Couldnt edit user: "+ TypeError}, 401 
 
+@app.route("/editUser", methods =["POST"])
+@jwt_required()
+def editUser():
+    try:
+        userID = request.json.get("userID")
+        TeamID = request.json.get("TeamID")
+        Email = request.json.get("Email")
+        FirstName = request.json.get("FirstName") 
+        SecondName = request.json.get("SecondName")
+        Password = request.json.get("Password")
+        ProfilePicture = request.json.get("ProfilePicture")
+        PhoneNumber = request.json.get("PhoneNumber")
+        LineManager = request.json.get("LineManager")
+        LineManagerID = request.json.get("LineManagerID")
+        TotalHolidays = request.json.get("TotalHolidays")
+        Admin = request.json.get("Admin")
+        user = User(userID, TeamID, Email, FirstName, SecondName, Password, ProfilePicture, PhoneNumber, LineManager, LineManagerID, TotalHolidays, Admin)
+        print(user)
+        Service.updateEntireAccount(user)
+        return {"msg": "Edited existing account"}, 200
+    except TypeError:
+        return {"msg": "Failed to add new user"}, 401
+    
+@app.route("/editAccount", methods =["POST"])
+@jwt_required()
+def editPassword():
+    try:
+        password = request.json.get('password')
+        current_user = get_jwt_identity()
+        print(current_user)
+        print(password)
+        Service.editUserAccountByUser(current_user, password)
+    except TypeError:
+        return {"msg": "Failed to change password"}, 401
 
 
 from datetime import datetime, timedelta
