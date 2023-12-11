@@ -182,6 +182,34 @@ def editPassword():
         Service.editUserAccountByUser(current_user, password)
     except TypeError:
         return {"msg": "Failed to change password"}, 401
+    
+@app.route("/denyRequest", methods = ["POST"])
+@jwt_required()
+def denyRequest():
+    try:
+        mydb = Database.connectToDB()
+        id = request.json.get('id')
+        startDate = request.json.get('start')
+        endDate = request.json.get('end')
+        print("Deny Request: "+id+", "+startDate+", "+endDate)
+        Database.changeStateOfRequest(mydb, id, startDate, endDate, Status.DENIED)
+        return {"msg": "Holiday Request has been denied"}, 200
+    except TypeError:
+        return {"msg": "Failed to deny request"}, 401
+    
+@app.route("/approveRequest", methods = ["POST"])
+@jwt_required()
+def approveRequest():
+    try:
+        id = request.json.get('id')
+        startDate = request.json.get('start')
+        endDate = request.json.get('end')
+        print("approve Request: "+id+", "+startDate+", "+endDate)
+        Database.changeStateOfRequest(mydb, id, startDate, endDate, Status.APPROVED)
+        return {"msg": "Holiday Request has been approved"}, 200
+    except TypeError:
+        return {"msg": "Failed to deny request"}, 401
+
 
 
 from datetime import datetime, timedelta
@@ -198,8 +226,8 @@ def profile():
 @app.route('/api/team-view', methods=["GET"])
 @jwt_required()
 def get_team_holidays():    
-    userId = get_jwt_identity()
-    line_manager_id = Database.getCurrentUserLineManagerID(mydb, userId)
+    email = get_jwt_identity()
+    line_manager_id = Database.getCurrentUserLineManagerID(mydb, email)
     # Gets the line managerId for the current user
     if line_manager_id is None:
         return {"msg":"Line Manager not found for this user"}, 404
@@ -216,6 +244,7 @@ def get_team_holidays():
         if user_details:
             user_details['holidays'] = Database.getPTORequestDict(mydb, memberId)
             team_details.append(user_details)
+        print(team_details)
     return team_details
 
 

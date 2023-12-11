@@ -230,17 +230,25 @@ class Database:
         cursor.execute(sqlCommand)
         mydb.commit()
 
-    def changeStateOfRequest(mydb, requestID, status):
+    def changeStateOfRequest(mydb, id, startDate, endDate, status):
         cursor = mydb.cursor()
-        sqlCommand = "UPDATE pto_requests SET Status = '"+str(status)+"' where requestID = '"+str(requestID)+"';"
-        cursor.execute(sqlCommand)
+        list = []
+        list.append(status)
+        list.append(id)
+        list.append(startDate)
+        list.append(endDate)
+        sqlCommand = "UPDATE pto_requests SET Status = %s where UserID = %s AND Start = %s AND End = %s;"
+        cursor.execute(sqlCommand,list)
         mydb.commit()
 
     def getCurrentUserLineManagerID(mydb, userID):
         cursor = mydb.cursor()
-        sqlCommand ="SELECT LineManagerID FROM users WHERE UserID = %s;"
-        cursor.execute(sqlCommand, (userID,))
+        list = []
+        list.append(userID)
+        sqlCommand ="SELECT LineManagerID FROM users WHERE Email = %s;"
+        cursor.execute(sqlCommand, list)
         result = cursor.fetchone()
+        print("result: "+ str(result))
         return result[0] if result else None
     
     def getUserDetails(mydb, userID):
